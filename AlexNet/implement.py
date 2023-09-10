@@ -70,7 +70,10 @@ class AlexNetImplement:
         worker_num = min([os.cpu_count(), batch_size if batch_size > 1 else 0, 4])
         print(f"Using {worker_num} workers to load data")
 
-        # 如果 multiprocessing_context 保持默认，在 Apple 芯片上比较慢建议“fork”， persistent_workers=True
+        # If `multiprocessing_context` keeps default, the DataLoader will slow down on macOS(probability Apple Silicon).
+        # So we need to set `multiprocessing_context` to "fork" to solve this problem.
+        # And I advise that set `persistent_workers` to True to speed up DataLoader on training.
+        # See more on https://discuss.pytorch.org/t/data-loader-multiprocessing-slow-on-macos/131204
         train_loader = torch.utils.data.DataLoader(
             train_set, batch_size, True,
             multiprocessing_context="fork", num_workers=worker_num, persistent_workers=True
@@ -86,24 +89,26 @@ class AlexNetImplement:
 
         best_acc = 0.0
         for epoch in range(self._epochs):
-            # train
+            # Training
             self._model.train()
             running_loss = 0.0
             train_bar = tqdm(train_loader, file=sys.stdout)
             for step, data in enumerate(train_bar):
                 images, labels = data
-                # 清除梯度
+                # Initialize the model’s parameter gradients to 0.
                 optimizer.zero_grad()
+                # Forward propagation calculates predicted values.
                 outputs = self._model(images.to(self._device))
+                # Calculate current loss.
                 loss = loss_function(outputs, labels.to(self._device))
-                # 反向传播
+                # Back propagation computes gradients.
                 loss.backward()
-                # 更新参数
+                # Update all parameters.
                 optimizer.step()
                 running_loss += loss.item()
                 train_bar.desc = f"[{epoch + 1}/{self._epochs}] Loss: {loss:.3f}"
 
-            # validate
+            # Validation
             self._model.eval()
             acc = 0.0
             with torch.no_grad():
@@ -129,6 +134,7 @@ class AlexNetImplement:
             self.train()
         else:
             self._model.load_state_dict(torch.load(self._save_path))
+
         data_transform = transforms.Compose(
             [
                 transforms.Resize((224, 224)),
@@ -138,7 +144,7 @@ class AlexNetImplement:
         )
 
         for value in self._class_dict.values():
-            print(f"**********Predict {value} now")
+            print(f"********** Predict {value} class now")
             predict_class_path = os.path.join(self._data_path, "predict", value)
             image_list = [
                 os.path.join(predict_class_path, file) for file in os.listdir(predict_class_path) if
@@ -154,5 +160,5 @@ class AlexNetImplement:
                     predict_class = torch.argmax(predict).numpy()
                     predict_class = int(predict_class)
 
-                print("结果：")
-                print(f"class: {self._class_dict[predict_class]:10}   prob: {predict[predict_class].numpy():.3}")
+                print("Result:")
+                print(f"Class: {self._class_dict[predict_class]:10} Probability: {predict[predict_class].numpy():.3}")
