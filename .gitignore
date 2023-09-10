@@ -1,0 +1,7 @@
+.idea
+.DS_Store
+
+data_set/
+!data_set/README.md
+!data_set/split_data.py
+model
