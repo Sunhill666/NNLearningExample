@@ -14,6 +14,7 @@ def main():
         else "cpu"
     )
     root_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
+    # "origin" and "optimized" are available for model option
     alex_net = AlexNetImplement("optimized", root_path, 20, device)
     alex_net.work()
 
