@@ -36,6 +36,7 @@ class AlexNetImplement:
     def _class_dict(self):
         train_path = os.path.join(self._root_path, "data_set", "train")
         class_list = [_dir for _dir in os.listdir(train_path) if os.path.isdir(os.path.join(train_path, _dir))]
+        # {0: 'roses', 1: 'sunflowers', 2: 'daisy', 3: 'dandelion', 4: 'tulips'}
         return dict((index, class_name) for index, class_name in enumerate(class_list))
 
     def work(self):

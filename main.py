@@ -15,8 +15,9 @@ def main():
     )
     root_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
     # "origin" and "optimized" are available for model option
-    alex_net = AlexNetImplement("optimized", root_path, 20, device)
-    alex_net.work()
+    for _model in ["origin", "optimized"]:
+        alex_net = AlexNetImplement(_model, root_path, 20, device)
+        alex_net.work()
 
 
 if __name__ == "__main__":

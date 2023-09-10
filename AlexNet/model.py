@@ -28,7 +28,7 @@ class OriginAlexNet(nn.Module):
             # 3rd max pooling layer
             nn.MaxPool2d(kernel_size=3, stride=2),
         )
-        self.avgpool = nn.AdaptiveAvgPool2d(6)
+        self.avg_pool = nn.AdaptiveAvgPool2d(6)
         # fully connected layers
         self.classifier = nn.Sequential(
             # 1st fully connected layer
@@ -46,7 +46,7 @@ class OriginAlexNet(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # forward pass
         x = self.features(x)
-        x = self.avgpool(x)
+        x = self.avg_pool(x)
         x = torch.flatten(x, 1)
         x = self.classifier(x)
         return x
@@ -70,7 +70,7 @@ class SimplifiedAlexNet(nn.Module):
             nn.ReLU(inplace=True),
             nn.MaxPool2d(kernel_size=3, stride=2),
         )
-        self.avgpool = nn.AdaptiveAvgPool2d((6, 6))
+        self.avg_pool = nn.AdaptiveAvgPool2d((6, 6))
         self.classifier = nn.Sequential(
             nn.Dropout(p=dropout),
             nn.Linear(256 * 6 * 6, 4096),
@@ -83,7 +83,7 @@ class SimplifiedAlexNet(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.features(x)
-        x = self.avgpool(x)
+        x = self.avg_pool(x)
         x = torch.flatten(x, 1)
         x = self.classifier(x)
         return x
