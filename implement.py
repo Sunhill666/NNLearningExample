@@ -143,7 +143,7 @@ class NNImplement:
             print("Model dose not exist, train now.")
             self.train()
         else:
-            self._model.load_state_dict(torch.load(self._save_path))
+            self._model.load_state_dict(torch.load(self._save_path, map_location=self._device))
 
         data_transform = transforms.Compose(
             [

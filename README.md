@@ -31,7 +31,8 @@
 3. 执行 `split_data.py` 脚本自动将数据集划分成训练集 `train` 和验证集 `valid` ，并生成预测集 `predict` 空目录。
 
     ```bash
-    python split_data.py
+    cd ..
+    python ./data_set/split_data.py
     ```
 
 4. 最终 `data_set` 目录结构如下：

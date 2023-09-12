@@ -31,7 +31,8 @@ This project provides some examples in the process of learning neural networks u
 3. Run `split_data.py` to automatically split the dataset into training set `train` and validation set `valid`, and generate the prediction set `predict` empty directory.
 
     ```bash
-    python split_data.py
+    cd ..
+    python ./data_set/split_data.py
     ```
 
 4. Finally, the directory structure of `data_set` is as follows:

@@ -15,8 +15,9 @@ def main():
         else "cpu"
     )
     '''
-    Each model best accuracy in 10 epochs:
+    Each model best accuracy in 100 epochs:
     OriginAlexNet: 0.832
+    OriginVGGNet16: 0.830
     '''
     root_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
     alex_net = NNImplement(NeuralNetwork.VGG16, NetType.Origin, root_path, 100, device)
