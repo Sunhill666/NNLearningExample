@@ -1,17 +1,21 @@
 import os
 import sys
+from enum import Enum
+from typing import Dict
 
 import torch
 from PIL import Image
+from torch import nn
 from torch.utils.data import DataLoader
 from torchvision import transforms, datasets
 from tqdm import tqdm
 
-from AlexNet.model import OriginAlexNet, SimplifiedAlexNet
+from AlexNet import OriginAlexNet, SimplifiedAlexNet
+from VGGNet import vgg
 
 
-class AlexNetImplement:
-    def __init__(self, model, root_path, epochs=10, device="cpu"):
+class NNImplement:
+    def __init__(self, model: Enum, model_type: Enum, root_path: str, epochs: int = 10, device: str = "cpu") -> None:
         train_path = os.path.join(root_path, "data_set", "train")
         valid_path = os.path.join(root_path, "data_set", "valid")
         predict_path = os.path.join(root_path, "data_set", "predict")
@@ -21,29 +25,34 @@ class AlexNetImplement:
         if not os.path.exists(os.path.join(root_path, "model")):
             os.mkdir(os.path.join(root_path, "model"))
 
+        self._save_path = os.path.join(root_path, "model", f"{model_type.value + model.value}.pth")
         self._root_path = root_path
         self._data_path = os.path.join(root_path, "data_set")
         self._epochs = epochs
         self._device = device
-        if model == "origin":
-            self._model = OriginAlexNet(num_classes=len(self._class_dict)).to(self._device)
-            self._save_path = os.path.join(root_path, "model", "OriginAlexNet.pth")
-        else:
-            self._model = SimplifiedAlexNet(num_classes=len(self._class_dict)).to(self._device)
-            self._save_path = os.path.join(root_path, "model", "SimplifiedAlexNet.pth")
+        self._model = self._model_proxy(model, model_type)
 
     @property
-    def _class_dict(self):
+    def _class_dict(self) -> Dict[int, str]:
         train_path = os.path.join(self._root_path, "data_set", "train")
         class_list = [_dir for _dir in os.listdir(train_path) if os.path.isdir(os.path.join(train_path, _dir))]
         # {0: 'roses', 1: 'sunflowers', 2: 'daisy', 3: 'dandelion', 4: 'tulips'}
         return dict((index, class_name) for index, class_name in enumerate(class_list))
 
-    def work(self):
+    def _model_proxy(self, model: Enum, model_type: Enum) -> nn.Module:
+        if model.name == "AlexNet":
+            if model_type.name == "Origin":
+                return OriginAlexNet(num_classes=len(self._class_dict)).to(self._device)
+            else:
+                return SimplifiedAlexNet(num_classes=len(self._class_dict)).to(self._device)
+        elif model.name.startswith("VGG"):
+            return vgg(model_type.value, model.value, False, num_classes=len(self._class_dict)).to(self._device)
+
+    def work(self) -> None:
         self.train()
         self.predict()
 
-    def train(self):
+    def train(self) -> None:
         train_transform = transforms.Compose(
             [
                 transforms.RandomResizedCrop(224),
@@ -129,7 +138,7 @@ class AlexNetImplement:
 
         print(f"Finished Training. Best Accuracy: {best_acc:.3f}")
 
-    def predict(self):
+    def predict(self) -> None:
         if not os.path.exists(self._save_path):
             print("Model dose not exist, train now.")
             self.train()
