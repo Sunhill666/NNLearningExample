@@ -86,11 +86,12 @@ class NNImplement:
         # See more on https://discuss.pytorch.org/t/data-loader-multiprocessing-slow-on-macos/131204
         train_loader = torch.utils.data.DataLoader(
             train_set, batch_size, True,
-            multiprocessing_context="fork", num_workers=worker_num, persistent_workers=True
+            multiprocessing_context="fork" if self._device == "mps" else None, num_workers=worker_num,
+            persistent_workers=True if self._device == "mps" else False
         )
         valid_loader = torch.utils.data.DataLoader(
             valid_set, batch_size, True,
-            multiprocessing_context="fork", num_workers=worker_num
+            multiprocessing_context="fork" if self._device == "mps" else None, num_workers=worker_num
         )
         print(f"Using {train_num} images for training, {valid_num} images for validation")
 
